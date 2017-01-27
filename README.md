@@ -75,7 +75,7 @@ git push origin YOUR_NAME:YOUR_NAME
 > Use only CSS/HTML (no bootstrap or something else)
 
 1. Add styles to the Form like on the [form-picture]
-1. Add styles to the table like on the ![table-picture](https://github.com/andrei-karalionak/test-tasks/blob/master/docs/imgs/table-example.png)
+1. Add styles to the table like on the picture below ![table-picture](https://github.com/andrei-karalionak/test-tasks/blob/master/docs/imgs/table-example.png)
 1. A table row should be highlighted when cursor on it.
 1. Add color stripes to a table row.
 1. Add styles to validation errors.
