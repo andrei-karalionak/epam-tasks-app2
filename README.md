@@ -11,7 +11,7 @@
 ##Clone repository
 
 ```
-git clone git@github.com:andrei-karalionak/epam-tasks-app2
+git clone https://github.com/andrei-karalionak/test-tasks.git
 ```
 
 ##Create new branch with your name
@@ -74,8 +74,8 @@ git push origin YOUR_NAME:YOUR_NAME
 
 > Use only CSS/HTML (no bootstrap or something else)
 
-1. Add styles to the Form like on the [form-picture](https://epam.sharepoint.com/sites/OrgPHPSolutionsTeamMSQ/FrontendCompetency/_layouts/15/Lightbox.aspx?url=https%3A%2F%2Fepam.sharepoint.com%2Fsites%2FOrgPHPSolutionsTeamMSQ%2FFrontendCompetency%2FDocuments%2FTasks-and-Tests%2520data%2Fhtml-form.jpeg).
-1. Add styles to the table like on the [table-picture](https://epam.sharepoint.com/sites/OrgPHPSolutionsTeamMSQ/FrontendCompetency/_layouts/15/Lightbox.aspx?url=https%3A%2F%2Fepam.sharepoint.com%2Fsites%2FOrgPHPSolutionsTeamMSQ%2FFrontendCompetency%2FDocuments%2FTasks-and-Tests%2520data%2Fhtml-table.jpg).
+1. Add styles to the Form like on the [form-picture]
+1. Add styles to the table like on the ![table-picture](https://raw.githubusercontent.com/andrei-karalionak/test-tasks/master/docs/imgs/table-example.png.)
 1. A table row should be highlighted when cursor on it.
 1. Add color stripes to a table row.
 1. Add styles to validation errors.
