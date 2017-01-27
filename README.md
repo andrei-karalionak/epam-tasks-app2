@@ -11,7 +11,7 @@
 ##Clone repository
 
 ```
-git clone git@github.com:volegg/epam-tasks-app2.git
+git clone git@github.com:andrei-karalionak/epam-tasks-app2
 ```
 
 ##Create new branch with your name
