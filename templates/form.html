@@ -6,20 +6,65 @@
     <title>Form</title>
 </head>
 <body>
-    <form method="post" action="/items">
+    <form method="post" action='/form' name="sendForm">
         <label>
             Name:
-            <input type="text" name="name" />
+            <input id="form-name" type="text" name="name" />
         </label>
         <label>
             Email:
-            <input type="text" name="email" />
+            <input id="form-email" type="text" name="email" />
         </label>
         <label>
             Phone:
-            <input type="text" name="phone" />
+            <input id="form-email" type="text" name="phone" />
         </label>
-        <button type="submit">Submit</button>
+        <button type="submit" id="submitButton">Submit</button>
     </form>
+    <script>
+        //window.onload = viewData;
+        var button = document.getElementById('submitButton');
+        var form = document.forms.sendForm;
+        button.addEventListener('click', sendRequest);
+        button.addEventListener('click', createItem);
+        function sendRequest(e) {
+            e.preventDefault();
+            var name = document.forms.sendForm.name.value;
+            var email = document.forms.sendForm.email.value;
+            var phone = document.forms.sendForm.phone.value;
+            var xhr, body;
+            xhr = new XMLHttpRequest();
+            body = 'name=' + name + '&email=' + email + '&phone=' + phone;
+            xhr.open('POST', '/items', true);
+            xhr.send(body);
+            xhr.onreadystatechange = function() {
+                if (xhr.status === 200) {
+                    form.reset();
+                }
+            }
+        }
+        function createItem(e) {
+            e.preventDefault();
+        }
+        function viewData() {
+            var xhr;
+            xhr = new XMLHttpRequest();
+            xhr.open('GET', '/items', true);
+            xhr.send();
+            xhr.onreadystatechange = function() {
+            }
+        }
+        function createTable() {
+            var table = document.createElement("table");
+            var row = table.insertRow(0);
+            for (var i = 0; i < 3; i++) {
+                row.insertCell(i);
+            }
+            document.body.appendChild(table);
+        }
+        function fillData() {
+
+        }
+    </script>
 </body>
 </html>
