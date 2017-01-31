@@ -2,24 +2,264 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-    <title>Form</title>
+    <title>Test task</title>
+    <style>
+        body {
+            font-family: Helvetica;
+        }
+
+        .formInput {
+            display: block;
+            width: 500px;
+            padding: 5px;
+            border-radius: 3px;
+            border: 1px solid #a7a7a7;
+            margin: 8px 0;
+        }
+
+        ::-webkit-input-placeholder {
+            font-weight: bold;
+        }
+
+        ::-moz-placeholder {
+            font-weight: bold;
+        }
+
+        :-moz-placeholder {
+            font-weight: bold;
+        }
+
+        :-ms-input-placeholder {
+            font-weight: bold;
+        }
+
+        .labelText {
+            font-weight: bold;
+        }
+
+        #itemsTable {
+            width: 800px;
+            text-align: center;
+            vertical-align: middle;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .tableRow:not(:last-child) {
+            border-bottom: 1px solid #bcbcbc;
+        }
+
+        .tableRow:nth-child(2n) {
+            background: #f9f9f9;
+        }
+
+        .tableRow:hover, td:hover {
+            background: #bcbcbc;
+        }
+
+        td {
+            margin: 0;
+            padding: 5px;
+            display: table-cell;
+        }
+
+        td:nth-child(1) {
+            font-weight: bold;
+        }
+
+        .deleteButton, #submitButton {
+            padding: 8px;
+            border-radius: 3px;
+            border: 0px;
+            cursor: pointer;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .deleteButton {
+            background: #d9534f;
+        }
+
+        .deleteButton:hover {
+            background: #ea534f;
+        }
+
+        #submitButton {
+            background: #5cb85c;
+        }
+
+        #submitButton:hover {
+            background: #6db85c;
+        }
+
+        .error {
+            display: none;
+            margin: 8px 0;
+            color: #ff0000;
+            font-size: 12px;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        @media screen and (max-width: 768px) {
+            form, #itemsTable {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <form method="post" action="/items">
-        <label>
-            Name:
-            <input type="text" name="name" />
+    <form method="post" action='/form' name="sendForm">
+        <label class='form'>
+            <span class="labelText">User Name</span>
+            <input id="formName" class="formInput" type="text" name="name" placeholder="Input name" />
+            <div class="error" id="nameError">Please, enter valid name!</div>
         </label>
         <label>
-            Email:
-            <input type="text" name="email" />
+            <span class="labelText">Email address</span>
+            <input id="formEmail" class="formInput" type="text" name="email" placeholder="Your email address" />
+            <div class="error" id="emailError">Please, enter valid e-mail!</div>
         </label>
         <label>
-            Phone:
-            <input type="text" name="phone" />
+            <span class="labelText">Phone</span>
+            <input id="formPhone" class="formInput" type="text" name="phone" placeholder="+375ZZXXXYYYY" />
+            <div class="error" id="phoneError">Please, enter valid phone number!</div>
         </label>
-        <button type="submit">Submit</button>
+        <button type="submit" id="submitButton">Submit</button>
     </form>
+    <table id="itemsTable" cellspacing="0">
+    </table>
+    <script>
+        var table = document.getElementById('itemsTable');
+        var submitButton = document.getElementById('submitButton');
+        var formEmail = document.getElementById('formEmail');
+        var formPhone = document.getElementById('formPhone');
+        submitButton.addEventListener('click', postData);
+        table.addEventListener('click', deleteData);
+        getData();
+
+        function postData(e) {
+            e.preventDefault();
+            var form = document.forms.sendForm;
+            var name = document.forms.sendForm.name.value;
+            var email = document.forms.sendForm.email.value;
+            var phone = document.forms.sendForm.phone.value;
+            validateName(name);
+            validatePhone(phone);
+            validateEmail(email);
+            if (checkPhone(phone) && checkEmail(email) && checkName(name)) {
+                var xhr = new XMLHttpRequest();
+                var body = 'name=' + name + '&email=' + email + '&phone=' + phone;
+                xhr.open('POST', '/items', true);
+                xhr.send(body);
+                xhr.onreadystatechange = function() {
+                    if (xhr.status === 200) {
+                        form.reset();
+                        getData();
+                    }
+                }
+            }
+        }
+
+        function getData() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/items', true);
+            xhr.send();
+            xhr.onreadystatechange = function() {
+                if (xhr.status === 200) {
+                    drawTable(JSON.parse(xhr.responseText));
+                }
+            }
+        }
+
+        function deleteData(e) {
+            if (e.target.tagName === 'BUTTON') {
+                var xhr = new XMLHttpRequest();
+                xhr.open('DELETE', '/items?id=' + e.target.id, true);
+                xhr.send();
+                xhr.onreadystatechange = function() {
+                    if (xhr.status === 200) {
+                        getData();
+                    }
+                }
+            }
+        }
+
+        function drawTable(items) {
+            table.innerHTML = '';
+            drawTableHeader();
+            for (var i = 0; i < items.length; i++) {
+                var tr = document.createElement('tr');
+                tr.appendChild(document.createElement('td')).innerText = i + 1;
+                for (var key in items[i]) {
+                    if (items[i].hasOwnProperty(key) && key !== 'id') {
+                        tr.appendChild(document.createElement('td')).innerText = items[i][key];
+                    }
+                }
+                var deleteButton = document.createElement('button');
+                deleteButton.appendChild(document.createTextNode('Delete'));
+                deleteButton.setAttribute('id', items[i].id);
+                deleteButton.classList.add('deleteButton');
+                tr.appendChild(document.createElement('td')).appendChild(deleteButton);
+                tr.classList.add('tableRow');
+                table.appendChild(tr);
+            }
+        }
+
+        function drawTableHeader() {
+            var tr = document.createElement('tr');
+            tr.appendChild(document.createElement('th')).innerText = "#";
+            tr.appendChild(document.createElement('th')).innerText = "Name";
+            tr.appendChild(document.createElement('th')).innerText = "E-mail";
+            tr.appendChild(document.createElement('th')).innerText = "Phone";
+            tr.appendChild(document.createElement('th')).innerText = "Action";
+            tr.classList.add('tableRow');
+            table.appendChild(tr);
+        }
+
+        function checkName(str) {
+            return /^[a-z ,.'-]+$/i.test(str);
+        }
+
+        function checkPhone(str) {
+            return /^[+]375\d{9}$|^8017\d{7}$/.test(str);
+        }
+
+        function checkEmail(str) {
+            return /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(str);
+        }
+
+        function validateName(str) {
+            var nameError = document.getElementById('nameError');
+            if (!checkName(str)) {
+                nameError.style.display = 'block';
+            }
+            else {
+                nameError.style.display = 'none';
+            }
+        }
+
+        function validatePhone(str) {
+            var phoneError = document.getElementById('phoneError');
+            if (!checkPhone(str)) {
+                phoneError.style.display = 'block';
+            }
+            else {
+                phoneError.style.display = 'none';
+            }
+        }
+
+        function validateEmail(str) {
+            var emailError = document.getElementById('emailError');
+            if (!checkEmail(str)) {
+                emailError.style.display = 'block';
+            }
+            else {
+                emailError.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
