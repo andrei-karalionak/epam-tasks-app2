@@ -4,31 +4,119 @@
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
     <title>Form</title>
+    <style>
+        body {
+            font-family: Helvetica;
+        }
+        .formInput {
+            display: block;
+            width: 500px;
+            padding: 5px;
+            border-radius: 3px;
+            border: 1px solid #a7a7a7;
+            margin: 8px 0;
+        }
+
+        ::-webkit-input-placeholder {
+            font-weight: bold;
+        }
+
+        ::-moz-placeholder {
+            font-weight: bold;
+        }
+
+        :-moz-placeholder {
+            font-weight: bold;
+        }
+
+        :-ms-input-placeholder {
+            font-weight: bold;
+        }
+
+        .labelText {
+            font-weight: bold;
+        }
+
+        #itemsTable {
+            width: 800px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .tableRow:nth-child(2n) {
+            background: #f9f9f9;
+        }
+
+        td {
+            margin: 0;
+            padding: 5px;
+            display: table-cell;
+        }
+
+        td:nth-child(1) {
+            font-weight: bold;
+        }
+
+        .deleteButton, #submitButton {
+            padding: 8px;
+            border-radius: 3px;
+            border: 0px;
+            cursor: pointer;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .deleteButton {
+            background: #d9534f;
+        }
+
+        .deleteButton:hover {
+            background: #ea534f;
+        }
+
+        #submitButton {
+            background: #5cb85c;
+        }
+
+        #submitButton:hover {
+            background: #6db85c;
+        }
+
+        .error {
+            display: none;
+            color: #ff0000;
+        }
+    </style>
 </head>
 <body>
     <form method="post" action='/form' name="sendForm">
-        <label>
-            Name:
-            <input id="form-name" type="text" name="name" />
+        <label class='form'>
+            <span class="labelText">User Name
+            <input id="formName" class="formInput" type="text" name="name" placeholder="Input name" />
         </label>
         <label>
-            Email:
-            <input id="form-email" type="text" name="email" />
+            <span class="labelText">Email address</span>
+            <input id="formEmail" class="formInput" type="text" name="email" placeholder="Your email address" />
+            <div class="error" id="emailError">Please, enter valid e-mail!</div>
         </label>
         <label>
-            Phone:
-            <input id="form-email" type="text" name="phone" />
+            <span class="labelText">Phone</span>
+            <input id="formPhone" class="formInput" type="text" name="phone" placeholder="+375ZZXXXYYYY" />
+            <div class="error" id="phoneError">Please, enter valid phone number!</div>
         </label>
         <button type="submit" id="submitButton">Submit</button>
     </form>
-    <table id="itemsTable">
+    <table id="itemsTable" cellspacing="0">
     </table>
     <script>
         var table = document.getElementById('itemsTable');
         var submitButton = document.getElementById('submitButton');
         var form = document.forms.sendForm;
-        button.addEventListener('click', postData);
+        var formEmail = document.getElementById('formEmail');
+        var formPhone = document.getElementById('formPhone');
+        submitButton.addEventListener('click', postData);
         table.addEventListener('click', deleteData);
+        getData();
 
         function postData(e) {
             e.preventDefault();
@@ -36,14 +124,19 @@
             var email = document.forms.sendForm.email.value;
             var phone = document.forms.sendForm.phone.value;
             var xhr, body;
-            xhr = new XMLHttpRequest();
-            body = 'name=' + name + '&email=' + email + '&phone=' + phone;
-            xhr.open('POST', '/items', true);
-            xhr.send(body);
-            xhr.onreadystatechange = function() {
-                if (xhr.status === 200) {
-                    form.reset();
-                    getData();
+            validatePhone(phone);
+            validateEmail(email);
+            if (checkPhone(phone) && checkEmail(email)) {
+                xhr = new XMLHttpRequest();
+                body = 'name=' + name + '&email=' + email + '&phone=' + phone;
+                xhr.open('POST', '/items', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(body);
+                xhr.onreadystatechange = function() {
+                    if (xhr.status === 200) {
+                        form.reset();
+                        getData();
+                    }
                 }
             }
         }
@@ -51,10 +144,12 @@
         function getData() {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', '/items', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send();
             xhr.onreadystatechange = function() {
                 if (xhr.status === 200) {
-                    drawTable(JSON.parse(xhr.responseText));
+                    var data = data != "" ? JSON.parse(xhr.responseText) : {};
+                    drawTable(data);
                 }
             }
         }
@@ -64,6 +159,7 @@
             if (e.target.tagName === 'BUTTON') {
                 var xhr = new XMLHttpRequest();
                 xhr.open('DELETE', '/items?id=' + e.target.id, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.send();
                 xhr.onreadystatechange = function() {
                     if (xhr.status === 200) {
@@ -97,9 +193,38 @@
                 var deleteButton = document.createElement('button');
                 deleteButton.appendChild(document.createTextNode('Delete'));
                 deleteButton.setAttribute('id', items[i].id);
-                deleteButton.classList.add('delete-button');
-                tr.appendChild(deleteButton);
+                deleteButton.classList.add('deleteButton');
+                tr.appendChild(document.createElement('td')).appendChild(deleteButton);
+                tr.classList.add('tableRow');
                 table.appendChild(tr);
+            }
+        }
+
+        function checkPhone(str) {
+            return /^[+]375\d{9}$|^8017\d{7}$/.test(str);
+        }
+
+        function checkEmail(str) {
+            return /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(str);
+        }
+
+        function validatePhone(str) {
+            var phoneError = document.getElementById('phoneError');
+            if (!checkPhone(str)) {
+                phoneError.style.display = 'block';
+            }
+            else {
+                phoneError.style.display = 'none';
+            }
+        }
+
+        function validateEmail(str) {
+            var emailError = document.getElementById('emailError');
+            if (!checkEmail(str)) {
+                emailError.style.display = 'block';
+            }
+            else {
+                emailError.style.display = 'none';
             }
         }
     </script>
