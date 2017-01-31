@@ -20,14 +20,31 @@
             <input id="form-email" type="text" name="phone" />
         </label>
         <button type="submit" id="submitButton">Submit</button>
+        <table id="itemsTable">
+            <th>#</th>
+            <th>Name</th>
+            <th>E-mail</th>
+            <th>Phone</th>
+            <th></th>
+        </table>
     </form>
     <script>
-        //window.onload = viewData;
         var button = document.getElementById('submitButton');
         var form = document.forms.sendForm;
-        button.addEventListener('click', sendRequest);
-        button.addEventListener('click', createItem);
-        function sendRequest(e) {
+        var table = document.getElementById('itemsTable');
+        button.addEventListener('click', sendPostRequest);
+        getData();
+        /*function del(e) {
+            e.preventDefault();
+            deleteItem('20170129155911850');
+        }
+        function deleteItem(id) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('DELETE', '/items?id=' + id, true);
+            xhr.send();
+            return;
+        }*/
+        function sendPostRequest(e) {
             e.preventDefault();
             var name = document.forms.sendForm.name.value;
             var email = document.forms.sendForm.email.value;
@@ -40,30 +57,37 @@
             xhr.onreadystatechange = function() {
                 if (xhr.status === 200) {
                     form.reset();
+                    getData();
                 }
             }
         }
-        function createItem(e) {
-            e.preventDefault();
-        }
-        function viewData() {
-            var xhr;
-            xhr = new XMLHttpRequest();
+        function getData() {
+            var xhr = new XMLHttpRequest();
             xhr.open('GET', '/items', true);
             xhr.send();
             xhr.onreadystatechange = function() {
+                if (xhr.status === 200) {
+                    drawTable(JSON.parse(xhr.responseText));
+                }
             }
         }
-        function createTable() {
-            var table = document.createElement("table");
-            var row = table.insertRow(0);
-            for (var i = 0; i < 3; i++) {
-                row.insertCell(i);
+        function drawTable(items) {
+            table.innerHTML = '';
+            for (var i = 0; i < items.length; i++) {
+                var tr = document.createElement('tr');
+                tr.appendChild(document.createElement('td')).innerText = i+1;
+                for (var key in items[i]) {
+                    if (items[i].hasOwnProperty(key) && key !== 'id') {
+                        tr.appendChild(document.createElement('td')).innerText = items[i][key];
+                    }
+                }
+                var deleteButton = document.createElement('button');
+                deleteButton.appendChild(document.createTextNode('Delete'));
+                deleteButton.setAttribute('id', items[i].id);
+                deleteButton.classList.add('delete-button');
+                tr.appendChild(deleteButton);
+                table.appendChild(tr);
             }
-            document.body.appendChild(table);
-        }
-        function fillData() {
-
         }
     </script>
 </body>
